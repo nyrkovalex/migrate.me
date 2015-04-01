@@ -36,36 +36,37 @@ import java.util.logging.Logger;
 import static java.util.stream.Collectors.toList;
 
 public class MigrateMe {
-    private static final Logger LOG = Seed.logger(MigrateMe.class);
 
-    public static void main(String[] args) throws Exception {
-        Seed.Logging.init(true, MigrateMe.class);
-        MigrateMe app = new MigrateMe(
-                Jsons.migrationsFile(),
-                Jsons.ranFile(),
+	private static final Logger LOG = Seed.logger(MigrateMe.class);
+
+	public static void main(String[] args) throws Exception {
+		Seed.Logging.init(true, MigrateMe.class);
+		MigrateMe app = new MigrateMe(
+				Jsons.migrationsFile(),
+				Jsons.ranFile(),
 				Plugins.plug()
-        );
-        app.run();
-    }
+		);
+		app.run();
+	}
 
-    private final Jsons.ROFile<Jsons.Migrations> migrationsFile;
-    private final Jsons.RWFile<Jsons.Ran> ranFile;
+	private final Jsons.ROFile<Jsons.Migrations> migrationsFile;
+	private final Jsons.RWFile<Jsons.Ran> ranFile;
 	private final Plugins.Plug plug;
 
-    private MigrateMe(
-            Jsons.ROFile<Jsons.Migrations> migrationsFile,
-            Jsons.RWFile<Jsons.Ran> ranFile,
+	private MigrateMe(
+			Jsons.ROFile<Jsons.Migrations> migrationsFile,
+			Jsons.RWFile<Jsons.Ran> ranFile,
 			Plugins.Plug plug
-    ) {
-        this.migrationsFile = migrationsFile;
-        this.ranFile = ranFile;
+	) {
+		this.migrationsFile = migrationsFile;
+		this.ranFile = ranFile;
 		this.plug = plug;
-    }
+	}
 
-    public void run() throws Exception {
-        Jsons.Ran alreadyRan = ranFile.read();
-        Jsons.Migrations migrations = migrationsFile.read();
-        Jsons.Driver driverJson = migrations.driver();
+	public void run() throws Exception {
+		Jsons.Ran alreadyRan = ranFile.read();
+		Jsons.Migrations migrations = migrationsFile.read();
+		Jsons.Driver driverJson = migrations.driver();
 		Plugins.Path pluginLoader = plug.path(driverJson.jar());
 		Driver driver = (Driver) pluginLoader.instanceOf(driverJson.className());
 		Db.Connection conn = Db.connectTo(migrations.connectionString()).with(driver);
@@ -86,6 +87,6 @@ public class MigrateMe {
 			}
 			return true;
 		});
-    }
+	}
 
 }

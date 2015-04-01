@@ -1,0 +1,13 @@
+{
+    "driver": {
+        "className": "org.postgresql.Driver",
+        "jar": "drivers/postgresql-9.4-1201.jdbc41.jar"
+    },
+    "connectionString": "jdbc:postgresql://localhost/test?user=test&password=test",
+    "once": [
+        "data/create_users_table.sql"
+    ],
+    "repeat": [
+        "procedures/users_by_email.sql"
+    ]
+}

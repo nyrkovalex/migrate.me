@@ -26,6 +26,7 @@ package com.github.nyrkovalex.migrate.me.json;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 class JsonsMigrations implements Jsons.Migrations {
 
@@ -37,8 +38,8 @@ class JsonsMigrations implements Jsons.Migrations {
     JsonsMigrations(JsonsDriver driver, String connectionString, List<String> once, List<String> repeat) {
         this.driver = driver;
         this.connectionString = connectionString;
-        this.once = Collections.unmodifiableList(once);
-        this.repeat = Collections.unmodifiableList(repeat);
+		this.once = Objects.isNull(once) ? Collections.emptyList() : Collections.unmodifiableList(once);
+		this.repeat = Objects.isNull(repeat) ? Collections.emptyList() : Collections.unmodifiableList(repeat);
     }
 
     @Override
@@ -73,11 +74,11 @@ class JsonsMigrations implements Jsons.Migrations {
 
     @Override
     public List<String> once() {
-        return once;
+		return Optional.ofNullable(once).orElse(Collections.emptyList());
     }
 
     @Override
     public List<String> repeat() {
-        return repeat;
+		return Optional.ofNullable(repeat).orElse(Collections.emptyList());
     }
 }

@@ -39,24 +39,24 @@ class JsonsRan implements Jsons.Ran {
         return new JsonsRan(Collections.emptyList());
     }
 
-    private final List<JsonsRan.Item> items;
+    private final List<JsonsRan.Item> ran;
 
     JsonsRan(List<JsonsRan.Item> items) {
-        this.items = Collections.unmodifiableList(items);
+        this.ran = Collections.unmodifiableList(items);
     }
 
     List<Item> items() {
-        return items;
+        return ran;
     }
 
     @Override
     public boolean canRun(String file) {
-        return !items.stream().anyMatch(r -> r.file().equals(file));
+        return !ran.stream().anyMatch(r -> r.file().equals(file));
     }
 
     @Override
     public Jsons.Ran addAll(List<Jsons.Ran.Item> executed) {
-        ArrayList<JsonsRan.Item> ranCopy = new ArrayList<>(items);
+        ArrayList<JsonsRan.Item> ranCopy = new ArrayList<>(ran);
         executed.forEach(e -> ranCopy.add(Item.fromOther(e)));
         return new JsonsRan(ranCopy);
     }
@@ -112,7 +112,7 @@ class JsonsRan implements Jsons.Ran {
 
     @Override
     public int hashCode() {
-        return Objects.hash(items);
+        return Objects.hash(ran);
     }
 
     @Override
@@ -124,6 +124,6 @@ class JsonsRan implements Jsons.Ran {
             return false;
         }
         final JsonsRan other = (JsonsRan) obj;
-        return Objects.equals(this.items, other.items);
+        return Objects.equals(this.ran, other.ran);
     }
 }
