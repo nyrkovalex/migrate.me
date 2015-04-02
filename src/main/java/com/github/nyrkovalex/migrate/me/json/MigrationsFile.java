@@ -25,8 +25,8 @@ package com.github.nyrkovalex.migrate.me.json;
 
 import java.util.logging.Logger;
 
-import com.github.nyrkovalex.seed.io.Io;
-import com.github.nyrkovalex.seed.json.Json;
+import com.github.nyrkovalex.seed.Io;
+import com.github.nyrkovalex.seed.Json;
 import com.github.nyrkovalex.seed.Seed;
 
 final class MigrationsFile implements Jsons.ROFile<Jsons.Migrations> {

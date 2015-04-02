@@ -25,9 +25,9 @@ package com.github.nyrkovalex.migrate.me.db;
 
 import org.junit.Test;
 import com.github.nyrkovalex.seed.Expect;
-import com.github.nyrkovalex.seed.db.Db;
-import com.github.nyrkovalex.seed.io.Io;
-import com.github.nyrkovalex.seed.sys.Sys;
+import com.github.nyrkovalex.seed.Db;
+import com.github.nyrkovalex.seed.Io;
+import com.github.nyrkovalex.seed.Sys;
 import java.time.Instant;
 import org.junit.Before;
 import org.mockito.InjectMocks;

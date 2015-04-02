@@ -23,10 +23,10 @@
  */
 package com.github.nyrkovalex.migrate.me.db;
 
-import com.github.nyrkovalex.seed.db.Db;
-import com.github.nyrkovalex.seed.io.Io;
+import com.github.nyrkovalex.seed.Db;
+import com.github.nyrkovalex.seed.Io;
 import com.github.nyrkovalex.seed.Seed;
-import com.github.nyrkovalex.seed.sys.Sys;
+import com.github.nyrkovalex.seed.Sys;
 
 import java.util.logging.Logger;
 

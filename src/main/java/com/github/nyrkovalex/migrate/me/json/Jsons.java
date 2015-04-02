@@ -26,8 +26,8 @@ package com.github.nyrkovalex.migrate.me.json;
 import java.time.Instant;
 import java.util.List;
 
-import com.github.nyrkovalex.seed.io.Io;
-import com.github.nyrkovalex.seed.json.Json;
+import com.github.nyrkovalex.seed.Io;
+import com.github.nyrkovalex.seed.Json;
 
 public final class Jsons {
 

@@ -23,9 +23,9 @@
  */
 package com.github.nyrkovalex.migrate.me.json;
 
-import com.github.nyrkovalex.seed.json.Json;
+import com.github.nyrkovalex.seed.Json;
 import com.github.nyrkovalex.seed.Expect;
-import com.github.nyrkovalex.seed.io.Io;
+import com.github.nyrkovalex.seed.Io;
 import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;

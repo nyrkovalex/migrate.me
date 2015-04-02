@@ -23,9 +23,9 @@
  */
 package com.github.nyrkovalex.migrate.me.json;
 
-import com.github.nyrkovalex.seed.json.Json;
+import com.github.nyrkovalex.seed.Json;
 import com.github.nyrkovalex.seed.Seed;
-import com.github.nyrkovalex.seed.io.Io;
+import com.github.nyrkovalex.seed.Io;
 import java.util.logging.Logger;
 
 final class RanFile implements Jsons.RWFile<Jsons.Ran> {

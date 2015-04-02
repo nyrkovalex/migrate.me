@@ -25,11 +25,11 @@ package com.github.nyrkovalex.migrate.me;
 
 import com.github.nyrkovalex.migrate.me.json.Jsons;
 import com.github.nyrkovalex.migrate.me.db.Database;
-import com.github.nyrkovalex.seed.db.Db;
-import com.github.nyrkovalex.seed.plugins.Plugins;
+import com.github.nyrkovalex.seed.Db;
+import com.github.nyrkovalex.seed.Plugins;
 import com.github.nyrkovalex.seed.Seed;
-import com.github.nyrkovalex.seed.io.Io;
-import com.github.nyrkovalex.seed.json.Json;
+import com.github.nyrkovalex.seed.Io;
+import com.github.nyrkovalex.seed.Json;
 import java.sql.Driver;
 import java.util.List;
 import java.util.logging.Logger;
@@ -44,19 +44,19 @@ public class MigrateMe {
 		MigrateMe app = new MigrateMe(
 				Jsons.migrationsFile(),
 				Jsons.ranFile(),
-				Plugins.plug()
+				Plugins.loader()
 		);
 		app.run();
 	}
 
 	private final Jsons.ROFile<Jsons.Migrations> migrationsFile;
 	private final Jsons.RWFile<Jsons.Ran> ranFile;
-	private final Plugins.Plug plug;
+	private final Plugins.Loader plug;
 
 	private MigrateMe(
 			Jsons.ROFile<Jsons.Migrations> migrationsFile,
 			Jsons.RWFile<Jsons.Ran> ranFile,
-			Plugins.Plug plug
+			Plugins.Loader plug
 	) {
 		this.migrationsFile = migrationsFile;
 		this.ranFile = ranFile;
@@ -67,7 +67,7 @@ public class MigrateMe {
 		Jsons.Ran alreadyRan = ranFile.read();
 		Jsons.Migrations migrations = migrationsFile.read();
 		Jsons.Driver driverJson = migrations.driver();
-		Plugins.Path pluginLoader = plug.path(driverJson.jar());
+		Plugins.Repo pluginLoader = plug.repo(driverJson.jar());
 		Driver driver = (Driver) pluginLoader.instanceOf(driverJson.className());
 		Db.Connection conn = Db.connectTo(migrations.connectionString()).with(driver);
 		conn.transaction(t -> {
