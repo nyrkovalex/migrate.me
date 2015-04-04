@@ -23,14 +23,11 @@
  */
 package com.github.nyrkovalex.migrate.me;
 
-import com.github.nyrkovalex.migrate.me.json.Jsons;
-import com.github.nyrkovalex.migrate.me.db.Database;
 import com.github.nyrkovalex.seed.Db;
 import com.github.nyrkovalex.seed.Plugins;
 import com.github.nyrkovalex.seed.Seed;
-import com.github.nyrkovalex.seed.Io;
-import com.github.nyrkovalex.seed.Json;
 import java.sql.Driver;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 import static java.util.stream.Collectors.toList;
@@ -40,7 +37,8 @@ public class MigrateMe {
 	private static final Logger LOG = Seed.logger(MigrateMe.class);
 
 	public static void main(String[] args) throws Exception {
-		Seed.Logging.init(true, MigrateMe.class);
+		Seed.Logging.init(Arrays.asList(args).contains("-v"), MigrateMe.class);
+		LOG.fine(() -> "Running in verbose mode. Debug output enabled");
 		MigrateMe app = new MigrateMe(
 				Jsons.migrationsFile(),
 				Jsons.ranFile(),
@@ -70,23 +68,52 @@ public class MigrateMe {
 		Plugins.Repo pluginLoader = plug.repo(driverJson.jar());
 		Driver driver = (Driver) pluginLoader.instanceOf(driverJson.className());
 		Db.Connection conn = Db.connectTo(migrations.connectionString()).with(driver);
-		conn.transaction(t -> {
-			Database.Executor executor = Database.executor(t);
-			List<Jsons.Ran.Item> oneTimersRan = migrations.once().stream()
-					.filter(alreadyRan::canRun)
-					.map(executor::execute)
-					.map(e -> Jsons.ranItem(e.fileName(), e.on()))
-					.collect(toList());
-			Jsons.Ran nowRan = alreadyRan.addAll(oneTimersRan);
-			migrations.repeat().forEach(executor::execute);
-			try {
-				ranFile.write(nowRan);
-			} catch (Io.Err | Json.Err err) {
-				LOG.severe(() -> "Failed to log ran migrations " + err);
-				return false;
-			}
-			return true;
+		conn.transaction(t -> runScripts(t, migrations, alreadyRan));
+	}
+
+	private boolean runScripts(Db.Runner t, Jsons.Migrations migrations, Jsons.Ran alreadyRan) {
+		final Jsons.Ran nowRan;
+		try {
+			nowRan = runDbUpdates(migrations, alreadyRan, t);
+		} catch (Database.Err err) {
+			LOG.severe(() -> "Failed to run DB updates " + err);
+			return false;
+		}
+		try {
+			ranFile.write(nowRan);
+		} catch (Jsons.Err err) {
+			LOG.severe(() -> "Failed to log ran migrations " + err);
+			return false;
+		}
+		return true;
+	}
+
+	private Jsons.Ran runDbUpdates(
+			Jsons.Migrations migrations, Jsons.Ran alreadyRan, Db.Runner t
+	) {
+		Database.Executor executor = Database.executor(t);
+		List<Jsons.Ran.Item> oneTimersRan = migrations.once().stream()
+				.filter((fileName) -> canRun(alreadyRan, fileName))
+				.map(executor::execute)
+				.map(e -> {
+					LOG.info(e.toString());
+					return Jsons.ranItem(e.fileName(), e.on());
+				})
+				.collect(toList());
+		Jsons.Ran nowRan = alreadyRan.addAll(oneTimersRan);
+		migrations.repeat().forEach((fileName) -> {
+			Database.Executed executed = executor.execute(fileName);
+			LOG.info(executed.toString());
 		});
+		return nowRan;
+	}
+
+	private boolean canRun(Jsons.Ran alreadyRan, String fileName) {
+		boolean canRun = alreadyRan.canRun(fileName);
+		if (!canRun) {
+			LOG.info(() -> "Skipping " + fileName);
+		}
+		return canRun;
 	}
 
 }

@@ -21,8 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.github.nyrkovalex.migrate.me.db;
+package com.github.nyrkovalex.migrate.me;
 
+import com.github.nyrkovalex.migrate.me.Database;
+import com.github.nyrkovalex.migrate.me.DbExecutor;
 import org.junit.Test;
 import com.github.nyrkovalex.seed.Expect;
 import com.github.nyrkovalex.seed.Db;

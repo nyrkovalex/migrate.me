@@ -21,21 +21,68 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.github.nyrkovalex.migrate.me.db;
+package com.github.nyrkovalex.migrate.me;
 
 import com.github.nyrkovalex.seed.Db;
 import com.github.nyrkovalex.seed.Io;
-import com.github.nyrkovalex.seed.Seed;
 import com.github.nyrkovalex.seed.Sys;
+import java.time.Instant;
 
-import java.util.logging.Logger;
+public class Database {
+
+	private final static Io.Fs FS = Io.fs();
+	private final static Sys.Clock CLOCK = Sys.clock();
+
+	public static Executor executor(Db.Runner runner) {
+		return new DbExecutor(FS, runner, CLOCK);
+	}
+
+	public static interface Executed {
+		Instant on();
+		String fileName();
+	}
+
+	public static interface Executor {
+		Executed execute(String fileName) throws Err;
+	}
+
+	public static class Err extends RuntimeException {
+		Err(Throwable cause) {
+			super(cause);
+		}
+	}
+}
+
+class DbExecuted implements Database.Executed {
+
+	private final Instant on;
+	private final String fileName;
+
+	DbExecuted(String fileName, Instant on) {
+		this.on = on;
+		this.fileName = fileName;
+	}
+
+	@Override
+	public Instant on() {
+		return on;
+	}
+
+	@Override
+	public String fileName() {
+		return fileName;
+	}
+
+	@Override
+	public String toString() {
+		return String.format("Executed %s on %s", fileName(), on());
+	}
+
+}
 
 class DbExecutor implements Database.Executor {
 
-	private final static Logger LOG = Seed.logger(DbExecutor.class);
-
 	private final Db.Runner runner;
-
 	private final Io.Fs fs;
 	private final Sys.Clock clock;
 
@@ -46,13 +93,13 @@ class DbExecutor implements Database.Executor {
 	}
 
 	@Override
-	public Database.Executed execute(String fileName) {
+	public Database.Executed execute(String fileName) throws Database.Err {
 		try {
 			String sql = fs.file(fileName).string();
 			runner.run(sql);
 			return new DbExecuted(fileName, clock.now());
 		} catch (Db.Err | Io.Err err) {
-			throw new RuntimeException(err);
+			throw new Database.Err(err);
 		}
 	}
 }

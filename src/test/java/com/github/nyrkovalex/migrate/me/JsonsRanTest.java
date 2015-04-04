@@ -21,54 +21,50 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.github.nyrkovalex.migrate.me.json;
+package com.github.nyrkovalex.migrate.me;
 
-import com.github.nyrkovalex.seed.Json;
-import com.github.nyrkovalex.seed.Expect;
-import com.github.nyrkovalex.seed.Io;
-import java.util.Optional;
-import org.junit.Before;
+import com.github.nyrkovalex.migrate.me.JsonsRan;
 import org.junit.Test;
+import com.github.nyrkovalex.seed.Expect;
+import java.util.Arrays;
+import java.util.List;
+import org.junit.Before;
 import org.mockito.Mock;
 
-public class RanFileTest extends Expect.Test {
+public class JsonsRanTest extends Expect.Test {
 
-    @Mock Io.Fs fs;
-    @Mock Io.File file;
+    @Mock JsonsRan.Item first;
+    @Mock JsonsRan.Item second;
 
-    @Mock Json.Parser json;
-    @Mock Json.File<JsonsRan> jsonFile;
-
-    @Mock JsonsRan ran;
-
-    RanFile ranFile;
+    List<JsonsRan.Item> items;
+    JsonsRan ran;
 
     @Before
     public void setUp() throws Exception {
-        given(fs.file(RanFile.FILENAME)).returns(file);
-        given(json.file(file, JsonsRan.class)).returns(jsonFile);
-
-        ranFile = new RanFile(fs, json);
+        items = Arrays.asList(first);
+        ran = new JsonsRan(items);
     }
 
     @Test
-    public void testShouldReturnEmptyRanSetWhenNoFilePresent() throws Exception {
-        given(jsonFile.readIfExists()).returns(Optional.empty());
-        Jsons.Ran read = ranFile.read();
-        expect(read).toBe(JsonsRan.empty());
+    public void testShouldCreateRanObjectFromItems() throws Exception {
+        expect(ran.items()).toBe(items);
     }
 
     @Test
-    public void testShouldReadFileWhenPresent() throws Exception {
-        given(jsonFile.readIfExists()).returns(Optional.of(ran));
-        Jsons.Ran read = ranFile.read();
-        expect(read == ran).toBe(Boolean.TRUE);
+    public void testShouldCreateNewObjectAddingAllItems() throws Exception {
+        JsonsRan newOne = (JsonsRan) ran.addAll(Arrays.asList(second));
+        expect(newOne.items()).toBe(Arrays.asList(first, second));
     }
 
     @Test
-    public void testShouldWriteRanFile() throws Exception {
-        ranFile.write(ran);
-        expect(jsonFile).toHaveCall().write(ran);
+    public void testShouldAllowToRunNewScript() throws Exception {
+        given(first.file()).returns("old");
+        expect(ran.canRun("new")).toBe(true);
     }
 
+    @Test
+    public void testShouldDenyToRunOldScript() throws Exception {
+        given(first.file()).returns("old");
+        expect(ran.canRun("old")).toBe(false);
+    }
 }

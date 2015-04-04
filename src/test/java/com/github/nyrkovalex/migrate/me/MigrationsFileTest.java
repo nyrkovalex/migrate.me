@@ -21,28 +21,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.github.nyrkovalex.migrate.me.json;
+package com.github.nyrkovalex.migrate.me;
 
-import java.util.logging.Logger;
-
+import com.github.nyrkovalex.migrate.me.MigrationsFile;
+import com.github.nyrkovalex.migrate.me.JsonsMigrations;
+import com.github.nyrkovalex.seed.Expect;
 import com.github.nyrkovalex.seed.Io;
 import com.github.nyrkovalex.seed.Json;
-import com.github.nyrkovalex.seed.Seed;
 
-final class MigrationsFile implements Jsons.ROFile<Jsons.Migrations> {
+import org.junit.Test;
+import org.junit.Before;
+import org.mockito.Mock;
 
-    private static final Logger LOG = Seed.logger(MigrationsFile.class);
-    static final String FILENAME = "migrate.me.json";
-    private final Json.File<JsonsMigrations> jsonFile;
+public class MigrationsFileTest extends Expect.Test {
 
-    MigrationsFile(Io.Fs fs, Json.Parser json) {
-        this.jsonFile = json.file(fs.file(FILENAME), JsonsMigrations.class);
+    @Mock Io.Fs fs;
+    @Mock Io.File file;
+    @Mock Json.Parser parser;
+    @Mock Json.File<JsonsMigrations> jsonFile;
+    @Mock JsonsMigrations result;
+
+    MigrationsFile mf;
+
+    @Before
+    public void setUp() {
+        given(fs.file(MigrationsFile.FILENAME)).returns(file);
+        given(parser.file(file, JsonsMigrations.class)).returns(jsonFile);
+
+        mf = new MigrationsFile(fs, parser);
     }
 
-    @Override
-    public Jsons.Migrations read() throws Io.Err {
-        LOG.fine(() -> "reading migrations file " + FILENAME);
-        return jsonFile.read();
+    @Test
+    public void testShouldReadMigrationsFile() throws Exception {
+        given(jsonFile.read()).returns(result);
+        expect(mf.read()).toBe(result);
     }
-
 }

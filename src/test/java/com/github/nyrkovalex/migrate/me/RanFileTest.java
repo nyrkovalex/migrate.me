@@ -21,37 +21,57 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.github.nyrkovalex.migrate.me.json;
+package com.github.nyrkovalex.migrate.me;
 
+import com.github.nyrkovalex.migrate.me.JsonsRan;
+import com.github.nyrkovalex.migrate.me.RanFile;
+import com.github.nyrkovalex.migrate.me.Jsons;
+import com.github.nyrkovalex.seed.Json;
 import com.github.nyrkovalex.seed.Expect;
 import com.github.nyrkovalex.seed.Io;
-import com.github.nyrkovalex.seed.Json;
-
-import org.junit.Test;
+import java.util.Optional;
 import org.junit.Before;
+import org.junit.Test;
 import org.mockito.Mock;
 
-public class MigrationsFileTest extends Expect.Test {
+public class RanFileTest extends Expect.Test {
 
     @Mock Io.Fs fs;
     @Mock Io.File file;
-    @Mock Json.Parser parser;
-    @Mock Json.File<JsonsMigrations> jsonFile;
-    @Mock JsonsMigrations result;
 
-    MigrationsFile mf;
+    @Mock Json.Parser json;
+    @Mock Json.File<JsonsRan> jsonFile;
+
+    @Mock JsonsRan ran;
+
+    RanFile ranFile;
 
     @Before
-    public void setUp() {
-        given(fs.file(MigrationsFile.FILENAME)).returns(file);
-        given(parser.file(file, JsonsMigrations.class)).returns(jsonFile);
+    public void setUp() throws Exception {
+        given(fs.file(RanFile.FILENAME)).returns(file);
+        given(json.file(file, JsonsRan.class)).returns(jsonFile);
 
-        mf = new MigrationsFile(fs, parser);
+        ranFile = new RanFile(fs, json);
     }
 
     @Test
-    public void testShouldReadMigrationsFile() throws Exception {
-        given(jsonFile.read()).returns(result);
-        expect(mf.read()).toBe(result);
+    public void testShouldReturnEmptyRanSetWhenNoFilePresent() throws Exception {
+        given(jsonFile.readIfExists()).returns(Optional.empty());
+        Jsons.Ran read = ranFile.read();
+        expect(read).toBe(JsonsRan.empty());
     }
+
+    @Test
+    public void testShouldReadFileWhenPresent() throws Exception {
+        given(jsonFile.readIfExists()).returns(Optional.of(ran));
+        Jsons.Ran read = ranFile.read();
+        expect(read == ran).toBe(Boolean.TRUE);
+    }
+
+    @Test
+    public void testShouldWriteRanFile() throws Exception {
+        ranFile.write(ran);
+        expect(jsonFile).toHaveCall().write(ran);
+    }
+
 }
