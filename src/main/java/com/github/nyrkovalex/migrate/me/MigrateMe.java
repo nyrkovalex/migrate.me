@@ -89,7 +89,9 @@ public class MigrateMe {
 	}
 
 	private Jsons.Ran runDbUpdates(
-			Jsons.Migrations migrations, Jsons.Ran alreadyRan, Db.Runner t
+			Jsons.Migrations migrations,
+			Jsons.Ran alreadyRan,
+			Db.Runner t
 	) {
 		Database.Executor executor = Database.executor(t);
 		List<Jsons.Ran.Item> oneTimersRan = migrations.once().stream()

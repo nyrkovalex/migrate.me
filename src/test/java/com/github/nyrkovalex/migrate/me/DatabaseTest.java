@@ -23,51 +23,56 @@
  */
 package com.github.nyrkovalex.migrate.me;
 
-import com.github.nyrkovalex.migrate.me.Database;
-import com.github.nyrkovalex.migrate.me.DbExecutor;
 import org.junit.Test;
-import com.github.nyrkovalex.seed.Expect;
+import com.github.nyrkovalex.seed.Tests;
 import com.github.nyrkovalex.seed.Db;
 import com.github.nyrkovalex.seed.Io;
 import com.github.nyrkovalex.seed.Sys;
 import java.time.Instant;
 import org.junit.Before;
+import org.junit.experimental.runners.Enclosed;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
-public class DbExecutorTest extends Expect.Test {
+@RunWith(Enclosed.class)
+public class DatabaseTest {
 
-	@Mock Io.Fs fs;
-	@Mock Io.File file;
-	@Mock Db.Connection conn;
-	@Mock Sys.Clock clock;
+	public static class DbExecutorTest extends Tests.Expect {
 
-	@InjectMocks DbExecutor executor;
+		@Mock Io.Fs fs;
+		@Mock Io.File file;
+		@Mock Db.Connection conn;
+		@Mock Sys.Clock clock;
 
-	@Before
-	public void setUp() throws Exception {
-		given(fs.file("test")).returns(file);
-		given(file.string()).returns("sql");
-	}
+		@InjectMocks DbExecutor executor;
 
-	@Test
-	public void testShouldExecuteFile() throws Exception {
-		executor.execute("test");
-		expect(conn).toHaveCall().run("sql");
-	}
+		@Before
+		public void setUp() throws Exception {
+			given(fs.file("test")).returns(file);
+			given(file.string()).returns("sql");
+		}
 
-	@Test
-	public void testShouldCreateExecutedWithCurretnTime() throws Exception {
-		Instant expected = Instant.now();
-		given(clock.now()).returns(expected);
-		Database.Executed executed = executor.execute("test");
-		expect(executed.on()).toBe(expected);
-	}
+		@Test
+		public void testShouldExecuteFile() throws Exception {
+			executor.execute("test");
+			expect(conn).toHaveCall().run("sql");
+		}
 
-	@Test
-	public void testShouldCreateExecutedWithGivenName() throws Exception {
-		Database.Executed executed = executor.execute("test");
-		expect(executed.fileName()).toBe("test");
+		@Test
+		public void testShouldCreateExecutedWithCurretnTime() throws Exception {
+			Instant expected = Instant.now();
+			given(clock.now()).returns(expected);
+			Database.Executed executed = executor.execute("test");
+			expect(executed.on()).toBe(expected);
+		}
+
+		@Test
+		public void testShouldCreateExecutedWithGivenName() throws Exception {
+			Database.Executed executed = executor.execute("test");
+			expect(executed.fileName()).toBe("test");
+		}
+
 	}
 
 }

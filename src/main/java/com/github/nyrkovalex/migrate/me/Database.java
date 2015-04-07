@@ -77,7 +77,6 @@ class DbExecuted implements Database.Executed {
 	public String toString() {
 		return String.format("Executed %s on %s", fileName(), on());
 	}
-
 }
 
 class DbExecutor implements Database.Executor {
