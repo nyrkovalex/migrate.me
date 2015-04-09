@@ -27,8 +27,6 @@ import com.github.nyrkovalex.seed.Io;
 import com.github.nyrkovalex.seed.Json;
 import org.junit.Test;
 import com.github.nyrkovalex.seed.Tests;
-import static com.github.nyrkovalex.seed.Tests.Expect.expect;
-import static com.github.nyrkovalex.seed.Tests.Expect.given;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -89,7 +87,7 @@ public class JsonsTest {
 		MigrationsFile mf;
 
 		@Before
-		public void setUp() {
+		public void setUp() throws Exception {
 			given(fs.file(MigrationsFile.FILENAME)).returns(file);
 			given(parser.file(file, JsonsMigrations.class)).returns(jsonFile);
 

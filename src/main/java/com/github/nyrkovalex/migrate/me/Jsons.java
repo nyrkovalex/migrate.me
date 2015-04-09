@@ -40,11 +40,11 @@ public final class Jsons {
 	private final static Json.Parser PARSER = Json.parser();
 	private final static Io.Fs FS = Io.fs();
 
-	public static RWFile<Ran> ranFile() {
+	public static RWFile<Ran> ranFile() throws Io.Err {
 		return new RanFile(FS, PARSER);
 	}
 
-	public static ROFile<Migrations> migrationsFile() {
+	public static ROFile<Migrations> migrationsFile() throws Io.Err {
 		return new MigrationsFile(FS, PARSER);
 	}
 
@@ -289,7 +289,7 @@ class MigrationsFile implements Jsons.ROFile<Jsons.Migrations> {
 	static final String FILENAME = "migrate.me.json";
 	private final Json.File<JsonsMigrations> jsonFile;
 
-	MigrationsFile(Io.Fs fs, Json.Parser json) {
+	MigrationsFile(Io.Fs fs, Json.Parser json) throws Io.Err {
 		this.jsonFile = json.file(fs.file(FILENAME), JsonsMigrations.class);
 	}
 
@@ -307,7 +307,7 @@ class RanFile implements Jsons.RWFile<Jsons.Ran> {
 	static final String FILENAME = "ran.json";
 	private final Json.File<JsonsRan> jsonFile;
 
-	RanFile(Io.Fs fs, Json.Parser json) {
+	RanFile(Io.Fs fs, Json.Parser json) throws Io.Err {
 		super();
 		this.jsonFile = json.file(fs.file(FILENAME), JsonsRan.class);
 	}
