@@ -66,7 +66,7 @@ public class MigrateMe {
 		Jsons.Migrations migrations = migrationsFile.read();
 		Jsons.Driver driverJson = migrations.driver();
 		Plugins.Repo pluginLoader = plug.repo(driverJson.jar());
-		Driver driver = (Driver) pluginLoader.instanceOf(driverJson.className());
+		Driver driver = pluginLoader.instanceOf(driverJson.className(), Driver.class);
 		Db.Connection conn = Db.connectTo(migrations.connectionString()).with(driver);
 		conn.transaction(t -> runScripts(t, migrations, alreadyRan));
 	}

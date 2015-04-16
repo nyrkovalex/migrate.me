@@ -25,15 +25,17 @@ package com.github.nyrkovalex.migrate.me;
 
 import com.github.nyrkovalex.seed.Io;
 import com.github.nyrkovalex.seed.Json;
-import org.junit.Test;
 import com.github.nyrkovalex.seed.Tests;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
 import org.junit.Before;
+import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
 @RunWith(Enclosed.class)
 public class JsonsTest {
@@ -48,7 +50,7 @@ public class JsonsTest {
 
 		@Before
 		public void setUp() throws Exception {
-			items = Arrays.asList(first);
+			items = Collections.singletonList(first);
 			ran = new JsonsRan(items);
 		}
 
@@ -59,7 +61,7 @@ public class JsonsTest {
 
 		@Test
 		public void testShouldCreateNewObjectAddingAllItems() throws Exception {
-			JsonsRan newOne = (JsonsRan) ran.addAll(Arrays.asList(second));
+			JsonsRan newOne = (JsonsRan) ran.addAll(Collections.singletonList(second));
 			expect(newOne.items()).toBe(Arrays.asList(first, second));
 		}
 

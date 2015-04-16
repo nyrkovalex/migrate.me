@@ -37,12 +37,12 @@ public class Database {
 		return new DbExecutor(FS, runner, CLOCK);
 	}
 
-	public static interface Executed {
+	public interface Executed {
 		Instant on();
 		String fileName();
 	}
 
-	public static interface Executor {
+	public interface Executor {
 		Executed execute(String fileName) throws Err;
 	}
 

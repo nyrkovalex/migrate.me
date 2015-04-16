@@ -23,304 +23,301 @@
  */
 package com.github.nyrkovalex.migrate.me;
 
-import java.time.Instant;
-import java.util.List;
-
+import com.github.nyrkovalex.seed.Errors;
 import com.github.nyrkovalex.seed.Io;
 import com.github.nyrkovalex.seed.Json;
 import com.github.nyrkovalex.seed.Seed;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.logging.Logger;
 
 public final class Jsons {
 
-	private final static Json.Parser PARSER = Json.parser();
-	private final static Io.Fs FS = Io.fs();
+    private final static Json.Parser PARSER = Json.parser();
+    private final static Io.Fs FS = Io.fs();
 
-	public static RWFile<Ran> ranFile() throws Io.Err {
-		return new RanFile(FS, PARSER);
-	}
+    public static RWFile<Ran> ranFile() throws Io.Err {
+        return new RanFile(FS, PARSER);
+    }
 
-	public static ROFile<Migrations> migrationsFile() throws Io.Err {
-		return new MigrationsFile(FS, PARSER);
-	}
+    public static ROFile<Migrations> migrationsFile() throws Io.Err {
+        return new MigrationsFile(FS, PARSER);
+    }
 
-	public static Ran.Item ranItem(String fileName, Instant on) {
-		return new JsonsRan.Item(fileName, on.toString());
-	}
+    public static Ran.Item ranItem(String fileName, Instant on) {
+        return new JsonsRan.Item(fileName, on.toString());
+    }
 
-	private Jsons() {
-	}
+    private Jsons() {
+    }
 
-	public static interface ROFile<T> {
-		T read() throws Err;
-	}
+    public interface ROFile<T> {
 
-	public static interface RWFile<T> extends ROFile<T> {
-		void write(T data) throws Err;
-	}
+        T read() throws Err;
+    }
 
-	public static interface Driver {
-		String className();
-		String jar();
-	}
+    public interface RWFile<T> extends ROFile<T> {
 
-	public static interface Migrations {
-		Driver driver();
-		String connectionString();
-		List<String> once();
-		List<String> repeat();
-	}
+        void write(T data) throws Err;
+    }
 
-	public static interface Ran {
-		boolean canRun(String fileName);
-		Ran addAll(List<Item> items);
+    public interface Driver {
 
-		public static interface Item {
-			Instant on();
-			String file();
-		}
-	}
+        String className();
 
-	public static class Err extends Exception {
-		Err(Throwable cause) {
-			super(cause);
-		}
+        String jar();
+    }
 
-		static <T> T rethrow(Seed.UnsafeCall<T> call) throws Err {
-			try {
-				return call.call();
-			} catch (Exception ex) {
-				throw new Err(ex);
-			}
-		}
+    public interface Migrations {
 
-		static void rethrow(Seed.VoidUnsafeCall call) throws Err {
-			try {
-				call.call();
-			} catch (Exception ex) {
-				throw new Err(ex);
-			}
-		}
-	}
+        Driver driver();
+
+        String connectionString();
+
+        List<String> once();
+
+        List<String> repeat();
+    }
+
+    public interface Ran {
+
+        boolean canRun(String fileName);
+
+        Ran addAll(List<Item> items);
+
+        interface Item {
+
+            Instant on();
+
+            String file();
+        }
+    }
+
+    public static class Err extends Exception {
+
+        Err(Throwable cause) {
+            super(cause);
+        }
+    }
 }
 
 class JsonsDriver implements Jsons.Driver {
 
-	private final String className;
-	private final String jar;
+    private final String className;
+    private final String jar;
 
-	private JsonsDriver(String className, String jar) {
-		this.className = className;
-		this.jar = jar;
-	}
+    private JsonsDriver(String className, String jar) {
+        this.className = className;
+        this.jar = jar;
+    }
 
-	@Override
-	public String className() {
-		return className;
-	}
+    @Override
+    public String className() {
+        return className;
+    }
 
-	@Override
-	public String jar() {
-		return jar;
-	}
+    @Override
+    public String jar() {
+        return jar;
+    }
 
 }
 
 class JsonsMigrations implements Jsons.Migrations {
 
-	private final JsonsDriver driver;
-	private final String connectionString;
-	private final List<String> once;
-	private final List<String> repeat;
+    private final JsonsDriver driver;
+    private final String connectionString;
+    private final List<String> once;
+    private final List<String> repeat;
 
-	JsonsMigrations(JsonsDriver driver, String connectionString, List<String> once, List<String> repeat) {
-		this.driver = driver;
-		this.connectionString = connectionString;
-		this.once = Objects.isNull(once) ? Collections.emptyList() : Collections.unmodifiableList(once);
-		this.repeat = Objects.isNull(repeat) ? Collections.emptyList() : Collections.unmodifiableList(repeat);
-	}
+    JsonsMigrations(JsonsDriver driver, String connectionString, List<String> once, List<String> repeat) {
+        this.driver = driver;
+        this.connectionString = connectionString;
+        this.once = Objects.isNull(once) ? Collections.emptyList() : Collections.unmodifiableList(once);
+        this.repeat = Objects.isNull(repeat) ? Collections.emptyList() : Collections.unmodifiableList(repeat);
+    }
 
-	@Override
-	public int hashCode() {
-		return Objects.hash(once, repeat, driver, connectionString);
-	}
+    @Override
+    public int hashCode() {
+        return Objects.hash(once, repeat, driver, connectionString);
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (obj == null) {
-			return false;
-		}
-		if (getClass() != obj.getClass()) {
-			return false;
-		}
-		final JsonsMigrations other = (JsonsMigrations) obj;
-		return Objects.equals(this.once, other.once)
-				&& Objects.equals(this.repeat, other.repeat)
-				&& Objects.equals(this.driver, other.driver)
-				&& Objects.equals(this.connectionString, other.connectionString);
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final JsonsMigrations other = (JsonsMigrations) obj;
+        return Objects.equals(this.once, other.once)
+                && Objects.equals(this.repeat, other.repeat)
+                && Objects.equals(this.driver, other.driver)
+                && Objects.equals(this.connectionString, other.connectionString);
+    }
 
-	@Override
-	public Jsons.Driver driver() {
-		return driver;
-	}
+    @Override
+    public Jsons.Driver driver() {
+        return driver;
+    }
 
-	@Override
-	public String connectionString() {
-		return connectionString;
-	}
+    @Override
+    public String connectionString() {
+        return connectionString;
+    }
 
-	@Override
-	public List<String> once() {
-		return Optional.ofNullable(once).orElse(Collections.emptyList());
-	}
+    @Override
+    public List<String> once() {
+        return Optional.ofNullable(once).orElse(Collections.emptyList());
+    }
 
-	@Override
-	public List<String> repeat() {
-		return Optional.ofNullable(repeat).orElse(Collections.emptyList());
-	}
+    @Override
+    public List<String> repeat() {
+        return Optional.ofNullable(repeat).orElse(Collections.emptyList());
+    }
 }
 
 class JsonsRan implements Jsons.Ran {
 
-	public static Item run(String file) {
-		return new Item(file, Instant.now().toString());
-	}
+    public static Item run(String file) {
+        return new Item(file, Instant.now().toString());
+    }
 
-	public static JsonsRan empty() {
-		return new JsonsRan(Collections.emptyList());
-	}
+    public static JsonsRan empty() {
+        return new JsonsRan(Collections.emptyList());
+    }
 
-	private final List<JsonsRan.Item> ran;
+    private final List<JsonsRan.Item> ran;
 
-	JsonsRan(List<JsonsRan.Item> items) {
-		this.ran = Collections.unmodifiableList(items);
-	}
+    JsonsRan(List<JsonsRan.Item> items) {
+        this.ran = Collections.unmodifiableList(items);
+    }
 
-	List<Item> items() {
-		return ran;
-	}
+    List<Item> items() {
+        return ran;
+    }
 
-	@Override
-	public boolean canRun(String file) {
-		return !ran.stream().anyMatch(r -> r.file().equals(file));
-	}
+    @Override
+    public boolean canRun(String file) {
+        return !ran.stream().anyMatch(r -> r.file().equals(file));
+    }
 
-	@Override
-	public Jsons.Ran addAll(List<Jsons.Ran.Item> executed) {
-		ArrayList<JsonsRan.Item> ranCopy = new ArrayList<>(ran);
-		executed.forEach(e -> ranCopy.add(Item.fromOther(e)));
-		return new JsonsRan(ranCopy);
-	}
+    @Override
+    public Jsons.Ran addAll(List<Jsons.Ran.Item> executed) {
+        ArrayList<JsonsRan.Item> ranCopy = new ArrayList<>(ran);
+        executed.forEach(e -> ranCopy.add(Item.fromOther(e)));
+        return new JsonsRan(ranCopy);
+    }
 
-	public static class Item implements Jsons.Ran.Item {
+    public static class Item implements Jsons.Ran.Item {
 
-		static Item fromOther(Jsons.Ran.Item other) {
-			if (other instanceof Item) {
-				return (Item) other;
-			} else {
-				return new Item(other.file(), other.on().toString());
-			}
-		}
+        static Item fromOther(Jsons.Ran.Item other) {
+            if (other instanceof Item) {
+                return (Item) other;
+            } else {
+                return new Item(other.file(), other.on().toString());
+            }
+        }
 
-		private final String file;
-		private final String on;
+        private final String file;
+        private final String on;
 
-		Item(String file, String on) {
-			this.file = file;
-			this.on = on;
-		}
+        Item(String file, String on) {
+            this.file = file;
+            this.on = on;
+        }
 
-		@Override
-		public int hashCode() {
-			return Objects.hash(file, on);
-		}
+        @Override
+        public int hashCode() {
+            return Objects.hash(file, on);
+        }
 
-		@Override
-		public boolean equals(Object obj) {
-			if (obj == null) {
-				return false;
-			}
-			if (getClass() != obj.getClass()) {
-				return false;
-			}
-			final Item other = (Item) obj;
-			return Objects.equals(this.file, other.file)
-					&& Objects.equals(this.on, other.on);
-		}
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            final Item other = (Item) obj;
+            return Objects.equals(this.file, other.file)
+                    && Objects.equals(this.on, other.on);
+        }
 
-		@Override
-		public Instant on() {
-			return Instant.parse(on);
-		}
+        @Override
+        public Instant on() {
+            return Instant.parse(on);
+        }
 
-		@Override
-		public String file() {
-			return file;
-		}
+        @Override
+        public String file() {
+            return file;
+        }
 
-	}
+    }
 
-	@Override
-	public int hashCode() {
-		return Objects.hash(ran);
-	}
+    @Override
+    public int hashCode() {
+        return Objects.hash(ran);
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (obj == null) {
-			return false;
-		}
-		if (getClass() != obj.getClass()) {
-			return false;
-		}
-		final JsonsRan other = (JsonsRan) obj;
-		return Objects.equals(this.ran, other.ran);
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final JsonsRan other = (JsonsRan) obj;
+        return Objects.equals(this.ran, other.ran);
+    }
 }
 
 class MigrationsFile implements Jsons.ROFile<Jsons.Migrations> {
 
-	private static final Logger LOG = Seed.logger(MigrationsFile.class);
-	static final String FILENAME = "migrate.me.json";
-	private final Json.File<JsonsMigrations> jsonFile;
+    private static final Logger LOG = Seed.logger(MigrationsFile.class);
+    static final String FILENAME = "migrate.me.json";
+    private final Json.File<Jsons.Migrations> jsonFile;
 
-	MigrationsFile(Io.Fs fs, Json.Parser json) throws Io.Err {
-		this.jsonFile = json.file(fs.file(FILENAME), JsonsMigrations.class);
-	}
+    MigrationsFile(Io.Fs fs, Json.Parser json) throws Io.Err {
+        this.jsonFile = json.file(fs.file(FILENAME), JsonsMigrations.class);
+    }
 
-	@Override
-	public Jsons.Migrations read() throws Jsons.Err {
-		LOG.fine(() -> "reading migrations file " + FILENAME);
-		return Jsons.Err.rethrow(() -> jsonFile.read());
-	}
+    @Override
+    public Jsons.Migrations read() throws Jsons.Err {
+        LOG.fine(() -> "reading migrations file " + FILENAME);
+        return Errors.rethrow(() -> jsonFile.read(), Jsons.Err::new);
+    }
 
 }
 
 class RanFile implements Jsons.RWFile<Jsons.Ran> {
 
-	private static final Logger LOG = Seed.logger(RanFile.class);
-	static final String FILENAME = "ran.json";
-	private final Json.File<JsonsRan> jsonFile;
+    private static final Logger LOG = Seed.logger(RanFile.class);
+    static final String FILENAME = "ran.json";
+    private final Json.File<JsonsRan> jsonFile;
 
-	RanFile(Io.Fs fs, Json.Parser json) throws Io.Err {
-		super();
-		this.jsonFile = json.file(fs.file(FILENAME), JsonsRan.class);
-	}
+    RanFile(Io.Fs fs, Json.Parser json) throws Io.Err {
+        super();
+        this.jsonFile = json.file(fs.file(FILENAME), JsonsRan.class);
+    }
 
-	@Override
-	public Jsons.Ran read() throws Jsons.Err {
-		LOG.fine(() -> "reading migrations file " + FILENAME);
-		return Jsons.Err.rethrow(() -> jsonFile.readIfExists().orElse(JsonsRan.empty()));
-	}
+    @Override
+    public Jsons.Ran read() throws Jsons.Err {
+        LOG.fine(() -> "reading migrations file " + FILENAME);
+        return Errors.rethrow(() -> jsonFile.readIfExists().orElse(JsonsRan.empty()), Jsons.Err::new);
+    }
 
-	@Override
-	public void write(Jsons.Ran stuff) throws Jsons.Err {
-		LOG.fine(() -> "writing to migrations file " + FILENAME);
-		Jsons.Err.rethrow(() -> jsonFile.write((JsonsRan) stuff));
-	}
+    @Override
+    public void write(Jsons.Ran stuff) throws Jsons.Err {
+        LOG.fine(() -> "writing to migrations file " + FILENAME);
+        Errors.rethrow(() -> jsonFile.write((JsonsRan) stuff), Jsons.Err::new);
+    }
 }
