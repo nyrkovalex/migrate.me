@@ -11,7 +11,7 @@
   "installer": {
     "class": "com.github.nyrkovalex.get.me.install.ExecJarInstaller",
     "params": {
-      "jar": "target/get.me.jar"
+      "jar": "migrate.me.jar"
     }
   }
 }
